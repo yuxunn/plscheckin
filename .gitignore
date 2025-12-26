@@ -4,7 +4,10 @@ __pycache__/
 .ipynb_checkpoints/
 .venv/
 env/
-data/
 .DS_Store
-
-
+data/
+*.db
+*.csv
+*.pkl
+debug_*
+inspect_samples.py
