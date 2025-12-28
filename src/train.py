@@ -9,9 +9,12 @@ from sklearn.metrics import f1_score, confusion_matrix, accuracy_score, recall_s
 from sklearn.model_selection import train_test_split, cross_val_score
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.neural_network import MLPClassifier
-
+import sys
+import os
+from dotenv import load_dotenv
 from src.data_loader import load_data
 from src.preprocessing import clean_data, engineer_features, get_preprocessor
+
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(message)s', handlers=[logging.FileHandler("training.log"), logging.StreamHandler()])
 logger = logging.getLogger()
@@ -100,6 +103,19 @@ def main():
     
     joblib.dump(best_pipe, config['paths']['model_output'])
     logger.info("✅ Pipeline Saved.")
-
+    
+    try:
+        from agent import PlsCheckinAgent
+        logger.info("🤖 Starting AI Agent Analysis...")
+        agent = PlsCheckinAgent()
+        feature_list = X.columns.tolist() 
+        biz_report = agent.interpret_model_results(feature_list) 
+        logger.info(biz_report)
+            
+        suggestions = agent.suggest_next_steps(df)
+        logger.info(suggestions)
+            
+    except Exception as e:
+        logger.error(f"LLM Integration Failed: {e}")
 if __name__ == "__main__":
     main()
