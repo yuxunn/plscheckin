@@ -11,40 +11,47 @@ logger = logging.getLogger()
 
 class PlsCheckinAgent:
     def __init__(self):
-        """Initializes the Agent and Google Gen AI Client using config.yaml paths."""
-        with open("config.yaml", "r") as f:
-            self.config = yaml.safe_load(f)
-        
-        self.model_path = self.config['paths']['model_output']
-        self.client = genai.Client()
+        self.api_key = os.getenv("GEMINI_API_KEY")
+        self.client = None
+
+        if not self.api_key:
+            raise ValueError("GEMINI_API_KEY not found in .env file. Please add it.")
+
+        try:
+            self.client = genai.Client(api_key=self.api_key)
+        except Exception as e:
+            raise RuntimeError(f"Failed to connect to Google GenAI: {e}")
 
     def interpret_model_results(self, feature_names):
         """
-        Translates feature importance into a natural language summary for business leaders.
+        Generates a summary using the feature names provided by main.py.
         """
-        try:
-            pipeline = joblib.load(self.model_path)
-            model = pipeline.named_steps['classifier']
-            
-            if hasattr(model, 'feature_importances_'):
-                importances = model.feature_importances_
-                feat_imp = sorted(zip(feature_names, importances), key=lambda x: x[1], reverse=True)[:3]
-            else:
-                return "Error: Model does not support feature importance extraction."
+        if not self.client:
+            return "Error: AI Client not active."
 
+        try:
+            if hasattr(feature_names, 'tolist'):
+                feature_names = feature_names.tolist()
+
+            features_str = ", ".join(feature_names) if feature_names else "Unknown features"
+            
             prompt = (
-                f"You are a Hotel Business Consultant. Translate these technical ML results into a "
-                f"3-sentence summary for a Hotel Manager: {feat_imp}. "
-                f"Identify the cause of no-shows and suggest one specific action."
+                f"You are a Hotel Business Consultant. The predictive model relies on these features: "
+                f"[{features_str}]. "
+                f"Briefly explain to a hotel manager how these specific factors typically influence cancellation rates "
+                f"and suggest one strategy to reduce no-shows based on them."
             )
 
             response = self.client.models.generate_content(
-                model="gemini-2.5-flash",
+                model="gemini-2.5-flash", 
                 contents=prompt
             )
-            return f"\n--- Business Summary ---\n{response.text}"
+            
+            return response.text
+            
         except Exception as e:
-            return f"GenAI Interpretation Error: {e}"
+            logger.error(f"GenAI Prediction Error: {e}")
+            return f"AI Analysis Failed: {str(e)}"
 
     def suggest_next_steps(self, df):
         """

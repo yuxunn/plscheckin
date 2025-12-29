@@ -12,3 +12,6 @@ data/
 debug_*
 inspect_samples.py
 .env
+node_modules/
+dist/
+build/
