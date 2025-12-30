@@ -58,7 +58,7 @@ if not model:
 
 app = FastAPI()
 
-origins = ["http://localhost:3000", "http://127.0.0.1:3000", "http://localhost:5173"]
+origins = ["http://localhost:3000", "http://127.0.0.1:3000", "http://localhost:5173", "https://plscheckin-2ldzhnzp6-yuxunns-projects.vercel.app"]
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
