@@ -22,6 +22,7 @@ export default function App() {
     num_children: 1.0
   });
 
+  const API_URL = process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000';
   const [currency, setCurrency] = useState('SGD'); 
   const [prediction, setPrediction] = useState(null);
   const [analysis, setAnalysis] = useState(null);
@@ -76,7 +77,7 @@ export default function App() {
     };
 
     try {
-      const response = await fetch('http://127.0.0.1:8000/predict', {
+      const response = await fetch(`${API_URL}/predict`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
@@ -100,7 +101,7 @@ export default function App() {
     setLoadingAnalysis(true);
     setAnalysis(null);
     try {
-      const response = await fetch('http://127.0.0.1:8000/api/analysis');
+      const response = await fetch(`${API_URL}/api/analysis`);
       const data = await response.json();
       setAnalysis(data.report);
     } catch (err) {
