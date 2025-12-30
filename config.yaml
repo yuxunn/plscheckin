@@ -1,0 +1,58 @@
+project:
+  name: "hotel_noshow_predictor"
+  version: "1.0.0"
+
+paths:
+  data_raw: "data/noshow.db"
+  model_output: "model.pkl"
+  logs: "training.log"
+
+preprocessing:
+  test_size: 0.2
+  random_state: 42
+  use_scaling: true 
+
+models:
+  random_forest:
+        enabled: true
+        type: "rf"
+        params:
+          n_estimators: 100
+          max_depth: 12
+          min_samples_leaf: 4
+          class_weight: "balanced_subsample" 
+          random_state: 42
+
+  neural_network:
+    enabled: true
+    type: "mlp"
+    params:
+      hidden_layer_sizes: [64]  
+      activation: "relu"
+      solver: "adam"
+      max_iter: 500
+      learning_rate_init: 0.001
+      early_stopping: true
+
+  deep_learning:
+    enabled: true
+    type: "mlp"
+    params:
+      hidden_layer_sizes: [128, 64, 32] 
+      activation: "relu"
+      solver: "adam"
+      max_iter: 1000
+      learning_rate_init: 0.0005
+      early_stopping: true
+  xgboost:
+      enabled: true
+      type: "xgb"
+      params:
+        n_estimators: 400
+        learning_rate: 0.03
+        max_depth: 7
+        subsample: 0.8
+        colsample_bytree: 0.8
+        scale_pos_weight: 1.8 
+        eval_metric: "logloss"
+        random_state: 42
