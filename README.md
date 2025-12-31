@@ -1,28 +1,17 @@
 # PlsCheckIn: Hotel No-Show Prediction System
-
+---
 **PlsCheckIn** is an end-to-end machine learning application designed to predict the likelihood of hotel guest no-shows. By analyzing booking data, the system provides probability scores and actionable insights to help hotel managers optimize occupancy and revenue.
 
 <div align="center">
-  <h1>PlsCheckIn: Hotel No-Show Prediction System</h1>
-  
-  <p>
-    <strong>Predict No-Shows. Optimize Revenue.</strong>
-  </p>
-  
-  <p>
-    An end-to-end machine learning application designed to predict the likelihood of hotel guest no-shows. <br>
-    By analyzing booking data, the system provides probability scores and actionable insights.
-  </p>
-
   <br>
 
-  <p align="center">
-    <img src="./assets/screenshotdemo1.png" alt="App Screenshot 1" width="45%">
-    &nbsp; &nbsp; &nbsp; &nbsp;
-    <img src="./assets/screenshotdemo2.png" alt="App Screenshot 2" width="45%">
-  </p>
+  <img src="./assets/screenshotdemo1.png" alt="App Screenshot 1" width="80%">
   
-  <br>
+  <br><br>
+
+  <img src="./assets/screenshotdemo2.png" alt="App Screenshot 2" width="80%">
+  
+  <br><br>
 </div>
 
 ---
