@@ -10,7 +10,7 @@ if [ -d "backend" ]; then
     if [ ! -f "model.pkl" ]; then
         echo "Model not found! Training model first..."
         export PYTHONPATH=$PYTHONPATH:.
-        python3 -m backend.train
+        python3 -m app.train
     else
         echo " Model found."
     fi
