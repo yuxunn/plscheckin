@@ -2,11 +2,54 @@
 
 **PlsCheckIn** is an end-to-end machine learning application designed to predict the likelihood of hotel guest no-shows. By analyzing booking data, the system provides probability scores and actionable insights to help hotel managers optimize occupancy and revenue.
 
+<div align="center">
+  <h1>PlsCheckIn: Hotel No-Show Prediction System</h1>
+  
+  <p>
+    <strong>Predict No-Shows. Optimize Revenue.</strong>
+  </p>
+  
+  <p>
+    An end-to-end machine learning application designed to predict the likelihood of hotel guest no-shows. <br>
+    By analyzing booking data, the system provides probability scores and actionable insights.
+  </p>
+
+  <br>
+
+  <p align="center">
+    <img src="./assets/screenshotdemo1.png" alt="App Screenshot 1" width="45%">
+    &nbsp; &nbsp; &nbsp; &nbsp;
+    <img src="./assets/screenshotdemo2.png" alt="App Screenshot 2" width="45%">
+  </p>
+  
+  <br>
+</div>
+
 ---
 
 ## 1. Pipeline Design & Architecture
 
 The system follows a microservices-inspired architecture, separating the User Interface, API Logic, and Inference Engine.
+
+### System Flowchart
+```mermaid
+graph TD
+    subgraph Frontend_Vercel["Frontend (Vercel)"]
+        A["User Interface / React"]
+    end
+
+    subgraph Backend_Render["Backend (Render)"]
+        B["API Gateway"]
+        C["FastAPI"]
+        D["XGBoost Engine"]
+    end
+
+    A -->|1. Submit Booking| B
+    B -->|2. Validate Request| C
+    C -->|3. Preprocess Features| D
+    D -->|4. Predict Probability| C
+    C -->|5. API Response| A
+```
 
 ### System Flow
 1.  **Data Acquisition:** User inputs booking details via the **React** frontend.
@@ -45,6 +88,11 @@ The core model is an **XGBoost Classifier** (Extreme Gradient Boosting), selecte
 * **Threshold Tuning:** Instead of the default `0.5` decision boundary, the model uses a **Dynamic Threshold** (e.g., `0.35`).
     * *Logic:* It is safer to flag a potential "No-Show" early than to miss it. This tuning maximizes the detection rate of cancellations.
 
+**Data Insights**
+
+Below is the distribution of No-Shows and the correlation with Lead Time, identified during the EDA phase:
+
+![Data Analysis](./assets/output.png)
 ---
 
 ## 4. Quality Assurance (QA) Report
