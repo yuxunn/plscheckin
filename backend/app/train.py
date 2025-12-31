@@ -12,8 +12,8 @@ from sklearn.neural_network import MLPClassifier
 import sys
 import os
 from dotenv import load_dotenv
-from src.data_loader import load_data
-from src.preprocessing import clean_data, engineer_features, get_preprocessor
+from app.data_loader import load_data
+from app.preprocessing import clean_data, engineer_features, get_preprocessor
 
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(message)s', handlers=[logging.FileHandler("training.log"), logging.StreamHandler()])
@@ -105,7 +105,7 @@ def main():
     logger.info("✅ Pipeline Saved.")
     
     try:
-        from agent import PlsCheckinAgent
+        from backend.agent import PlsCheckinAgent
         logger.info("🤖 Starting AI Agent Analysis...")
         agent = PlsCheckinAgent()
         feature_list = X.columns.tolist() 

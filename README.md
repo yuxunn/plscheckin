@@ -110,7 +110,9 @@ This project underwent rigorous testing to ensure stability in a production envi
 * Node.js & npm
 
 **1. Install Backend Dependencies**
+You need to install the Python packages located in the `backend` folder.
 ```bash
+cd backend
 pip install -r requirements.txt
 ```
 
