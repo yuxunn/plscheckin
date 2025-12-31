@@ -12,19 +12,24 @@ load_dotenv()
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("API")
 
-if os.path.abspath(".") not in sys.path:
-    sys.path.append(os.path.abspath("."))
+current_dir = os.path.dirname(os.path.abspath(__file__))
+
+root_dir = os.path.abspath(os.path.join(current_dir, ".."))
+
+if root_dir not in sys.path:
+    sys.path.append(root_dir)
 
 try:
-    from src.preprocessing import clean_data, engineer_features
-except ImportError:
-    logger.critical("CRITICAL: Could not import 'preprocessing'. Check your src folder.")
+    from backend.app.preprocessing import clean_data, engineer_features
+except ImportError as e:
+    logger.critical(f"CRITICAL: Import failed: {e}")
+    logger.critical(f"Current Sys Path: {sys.path}")
     sys.exit(1)
 agent = None
 agent_init_error = None  
 
 try:
-    from agent import PlsCheckinAgent
+    from backend.agent import PlsCheckinAgent
     try:
         agent = PlsCheckinAgent()
         logger.info("GenAI Agent initialized successfully.")
