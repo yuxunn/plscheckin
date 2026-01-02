@@ -12,21 +12,37 @@ from sklearn.neural_network import MLPClassifier
 import sys
 import os
 from dotenv import load_dotenv
-from app.data_loader import load_data
-from app.preprocessing import clean_data, engineer_features, get_preprocessor
+from .data_loader import load_data
+from .preprocessing import clean_data, engineer_features, get_preprocessor
 
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(message)s', handlers=[logging.FileHandler("training.log"), logging.StreamHandler()])
 logger = logging.getLogger()
 
-def load_config(path="config.yaml"):
-    with open(path, "r") as f: return yaml.safe_load(f)
+def load_config():
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    
+    backend_dir = os.path.dirname(script_dir)
+    
+    config_path = os.path.join(backend_dir, "config.yaml")
+
+    print(f"Looking for config at: {config_path}")
+    if not os.path.exists(config_path):
+        raise FileNotFoundError(f"Config file not found at: {config_path}")
+
+    with open(config_path, "r") as f:
+        return yaml.safe_load(f)
 
 def main():
     logger.info("Starting Optimized Training (OneHot + Interactions)")
     
     config = load_config()
-    df = load_data(config['paths']['data_raw'])
+    script_dir = os.path.dirname(os.path.abspath(__file__)) 
+    root_dir = os.path.dirname(os.path.dirname(script_dir))
+    backend_dir = os.path.dirname(script_dir)        
+
+    data_path = os.path.join(backend_dir, config['paths']['data_raw'])
+    df = load_data(data_path)
     noise_cols = [
         'platform',    
         'num_children',
@@ -105,7 +121,9 @@ def main():
     logger.info("✅ Pipeline Saved.")
     
     try:
-        from backend.agent import PlsCheckinAgent
+        from agent import PlsCheckinAgent
+
+
         logger.info("🤖 Starting AI Agent Analysis...")
         agent = PlsCheckinAgent()
         feature_list = X.columns.tolist() 
