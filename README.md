@@ -2,6 +2,19 @@
 ---
 **PlsCheckIn** is an end-to-end machine learning application designed to predict the likelihood of hotel guest no-shows. By analyzing booking data, the system provides probability scores and actionable insights to help hotel managers optimize occupancy and revenue.
 
+## 1. Strategic Design: Revenue Maximisation
+The primary goal of this system is to minimize the financial impact of missed bookings by balancing two opposing risks: **Opportunity Cost** (empty rooms) vs. **Walk Cost** (overbooking expenses).
+
+While a production system would toggle between "Safe" (high precision) and "Aggressive" (high recall) modes based on seasonality, **this MVP specifically implements the Aggressive Revenue Strategy.**
+
+**The Decision:** Probability threshold of 0.52 to prioritize Recall.
+
+* **Goal:** Identify every potential no-show to unlock the maximum amount of reusable inventory.
+
+* **Trade-off:** Accept a higher rate of False Positives (potential walks) to ensure the hotel does not miss out on any revenue opportunity. 
+
+**Impact:** This configuration identifies over 6,000 potential empty rooms that would otherwise generate zero revenue.
+
 <div align="center">
   <br>
 
@@ -16,7 +29,7 @@
 
 ---
 
-## 1. Pipeline Design & Architecture
+## 2. Pipeline Design & Architecture
 
 The system follows a microservices-inspired architecture, separating the User Interface, API Logic, and Inference Engine.
 
@@ -57,8 +70,8 @@ graph TD
 
 ---
 
-## 2. Notebook Findings: EDA & Data Cleaning
-During the Exploratory Data Analysis (EDA) phase (notebooks/01_eda.ipynb), several data quality issues were identified and resolved in the cleaning pipeline (src/preprocessing.py).
+## 3. Notebook Findings: EDA & Data Cleaning
+During the Exploratory Data Analysis (EDA) phase `(notebooks/01_eda.ipynb)`, several data quality issues were identified and resolved in the cleaning pipeline `(src/preprocessing.py)`.
 
 **Key Findings & Anomalies**
 * **Inconsistent Formatting:** arrival_month contained mixed casing (e.g., ApRiL, OcTobeR), which duplicated categories.
@@ -66,7 +79,7 @@ During the Exploratory Data Analysis (EDA) phase (notebooks/01_eda.ipynb), sever
 * **Text in Numeric Fields:** Columns like num_adults contained text representations (e.g., "one", "two") instead of integers.
 * **Missing Data:** Significant gaps were found in room and price columns which required imputation strategies based on logical groupings.
 **Cleaning & Engineering Strategies**
-To address these issues, the pipline implements the following transformations: 
+To address these issues, the pipeline implements the following transformations: 
 
 | Issue | Resolution Strategy | Source Code (`preprocessing.py`) |
 | :--- | :--- | :--- |
@@ -79,7 +92,7 @@ To address these issues, the pipline implements the following transformations:
 
 
 
-## 3. Feature Engineering Process
+## 4. Feature Engineering Process
 
 To ensure high model accuracy, raw booking data undergoes rigorous engineering before training:
 
@@ -113,20 +126,64 @@ Analysis of the "Signal Score" reveals that guest origin and hotel branch are th
 
 ---
 
-## 4. Model Evaluation & Metrics
+## 5. Model Evaluation & Metrics
 
-The core model is an **XGBoost Classifier** (Extreme Gradient Boosting), selected for its superior performance on structured tabular data and efficient handling of sparse features.
+A rigorous benchmark across three distinct machine learning architectures was conducted to identify the optimal balance between precision and recall.
 
-### Key Metrics
+#### Candidate Models 
+The training pipeline evaluated the following algorithms with hyperparameter tuning:
+
+**1. XGBoost (Gradient Boosting):**
+* Configuration: Tuned with a high max-depth (9) and scale_pos_weight=2.06 to aggressively penalize missing no-shows.
+* Strengths: Superior handling of sparse data and non-linear feature interactions.
+
+**2. Random Forest:**
+* Configuration: Utilized class_weight="balanced_subsample" to dynamically adjust weights based on the bootstrap sample distribution.
+* Strengths: Robust baseline that reduces variance and is less prone to overfitting than individual decision trees.
+
+**3. Neural Networks (Deep Learning):**
+* Configuration: Tested both Shallow ([64] units) and Deep ([128, 64, 32] units) Multi-Layer Perceptrons (MLP) with early_stopping to prevent overfitting.
+* Strengths: Capable of capturing complex, high-dimensional patterns, though typically requires more data and normalization compared to tree models.
+
+#### Selected Model: XGBoost 
+The core model is an **XGBoost Classifier**, selected for its superior performance on structured tabular data and efficient handling of sparse features.
+
+#### Key Metrics
 * **Target Metric:** **F1-Score (0.67)**. Accuracy alone is misleading because "Check-Ins" often outnumber "No-Shows." The F1-score ensures a balance between Precision (accuracy of "No-Show" predictions) and Recall (ability to catch all actual "No-Shows").
 * **Performance:** The model currently achieves a Test F1-Score of 0.6739.
 * **Threshold Tuning:** Instead of the default `0.5` decision boundary, the model uses a **Dynamic Threshold** (Optimsied to 0.52).
     * *Logic:* This tuning will maximise the detection rate of cancellations while maintaining precision. 
 
+#### **Performance Analysis: The Confusion Matrix**
+The confusion matrix below visualizes the model's performance at the selected **Aggressive Threshold (0.52)**. It illustrates the strategic trade-off between capturing inventory and avoiding operational risks.
+
+![Confusion Matrix](./assets/confusion_matrix.png)
+
+#### **Breakdown of Results**
+**1. True Positives (6,246 Guests)**
+* Scenario: The model correctly identified these guests would cancel.
+* Impact: Success. This represents ~6,200 rooms that were effectively "unlocked" for resale, preventing them from sitting empty.
+
+**2. False Positives (3,446 Guests)**
+
+* Scenario: The model predicted cancellation, but the guest arrived.
+* Impact: Managed Risk. While high, this number is acceptable under the Aggressive Strategy. In practice, a hotel would not re-sell all 6,246 rooms found above; they would use this 3,446 figure to calculate a "safety buffer" (e.g., only overbooking by 50% of the predicted no-shows).
+
+**3. False Negatives (2,599 Guests)**
+* Scenario: The model predicted the guest would come, but they didn't.
+* Impact: Sunk Cost. These rooms sat empty. However, this number is significantly lower than the captured no-shows (6,246), proving the model captures the majority of the opportunity.
+
+
+### **Strategic Insight:** 
+
+At this threshold, for every 1 guest potentially wrongly flagged (False Positive), the model successfully identifies ~2 empty rooms (True Positives) available for resale. This 2:1 Efficiency Ratio justifies the aggressive strategy during low-occupancy periods.
+
+### **Policy Recommendation**
+Because a single threshold cannot satisfy every business need, future iterations should evaluate the model against the two distinct operational policies. This allows the hotel to "tune" the confusion matrix based on their current priorities.
 
 ---
 
-## 5. Quality Assurance (QA) Report
+## 6. Quality Assurance (QA) Report
 
 This project underwent rigorous testing to ensure stability in a production environment. Below is a summary of the technical challenges resolved:
 
@@ -145,14 +202,14 @@ This project underwent rigorous testing to ensure stability in a production envi
 
 ---
 
-## 6. Live Demo & Access 
+## 7. Live Demo & Access 
 The application is deployed and accessible online without local installation: 
 
 * **Frontend Application:** https://plscheckin.vercel.app
 * **Backend API:** https://plscheckin.onrender.com/ (Hosted on Render and auto-connects to the frontend)
 
 
-## 7. How to Run Locally
+## 8. How to Run Locally
 
 **Prerequisites:**
 * Python 3.10+
