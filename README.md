@@ -101,7 +101,7 @@ To ensure high model accuracy, raw booking data undergoes rigorous engineering b
 * **Data Cleaning:** Handling missing values and removing outliers in `adr` (Average Daily Rate) to prevent skewed predictions.
 * **Feature Selection:** The pipeline utilizes Feature Importance extraction to prioritize variables that most strongly correlate with cancellation behavior (e.g., *Lead Time* and *Previous Cancellations*).
 
-**Data Insights**
+#### **Data Insights**
 
 Below is the distribution of No-Shows and the correlation with Lead Time, identified during the EDA phase:
 
@@ -109,7 +109,7 @@ Below is the distribution of No-Shows and the correlation with Lead Time, identi
 
 To validate the model's logic and performance, the top driving factors and error rate was analysed. 
 
-### Feature Importance Ranking
+#### Feature Importance Ranking
 Analysis of the "Signal Score" reveals that guest origin and hotel branch are the strongest predictors of no-shows, while the booking platform is statistically insignificant.
 
 | Rank | Feature | Signal Score (MAD) | Impact Level |
@@ -160,6 +160,7 @@ The confusion matrix below visualizes the model's performance at the selected **
 ![Confusion Matrix](./assets/confusion_matrix.png)
 
 #### **Breakdown of Results**
+
 **1. True Positives (6,246 Guests)**
 * Scenario: The model correctly identified these guests would cancel.
 * Impact: Success. This represents ~6,200 rooms that were effectively "unlocked" for resale, preventing them from sitting empty.
@@ -174,11 +175,11 @@ The confusion matrix below visualizes the model's performance at the selected **
 * Impact: Sunk Cost. These rooms sat empty. However, this number is significantly lower than the captured no-shows (6,246), proving the model captures the majority of the opportunity.
 
 
-### **Strategic Insight:** 
+#### **Strategic Insight:** 
 
 At this threshold, for every 1 guest potentially wrongly flagged (False Positive), the model successfully identifies ~2 empty rooms (True Positives) available for resale. This 2:1 Efficiency Ratio justifies the aggressive strategy during low-occupancy periods.
 
-### **Policy Recommendation**
+#### **Policy Recommendation**
 Because a single threshold cannot satisfy every business need, future iterations should evaluate the model against the two distinct operational policies. This allows the hotel to "tune" the confusion matrix based on their current priorities.
 
 ---
